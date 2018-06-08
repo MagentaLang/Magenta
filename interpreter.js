@@ -50,6 +50,11 @@ interpreter["lex"] = (input) => {
 		}
 	}
 
+	if (error) {
+		console.log(`Error: ${error} [at Parser]`);
+		return [];
+	}
+	
 	return tokens;
 }
 
@@ -57,6 +62,7 @@ interpreter["parse"] = (tokens) => {
 	var functions = [
 		"print"
 	];
+	var error = null;
 
 	for (let i = 0; i < tokens.length; i++) {
 		const token = tokens[i];
@@ -72,10 +78,13 @@ interpreter["parse"] = (tokens) => {
 						break;
 				}
 			} else {
-				throw new Error(`Function with no brace [Token Index ${i}]`);
+				error = `Function with no brace [Token Index ${i + 1}]`;
+				break;
 			}
 		}
 	}
+
+	if (error) console.log(`Error: ${error} [at Parser]`);
 }
 
 module.exports = interpreter;
