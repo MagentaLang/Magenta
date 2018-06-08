@@ -6,6 +6,8 @@ interpreter["lex"] = (input) => {
 	string = "";
 	var state = false; // false = 0, true = 1
 
+	var error = null;
+
 	for (let i = 0; i < input.length; i++) {
 		token += input[i];
 		switch (token) {
@@ -51,10 +53,10 @@ interpreter["lex"] = (input) => {
 	}
 
 	if (error) {
-		console.log(`Error: ${error} [at Parser]`);
+		console.log(`Error: ${error} [at Lexer]`);
 		return [];
 	}
-	
+
 	return tokens;
 }
 
@@ -81,6 +83,9 @@ interpreter["parse"] = (tokens) => {
 				error = `Function with no brace [Token Index ${i + 1}]`;
 				break;
 			}
+		} else { // Overflow if no if-elses catch the token
+			error = `Unexpected index [Token Index ${i + 1}]`;
+			break;
 		}
 	}
 

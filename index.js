@@ -5,7 +5,7 @@ if (process.argv[2] == null) {
 	console.log("No File Specified");
 } else {
 	fs.readFile(process.argv[2], "utf8", (err, data) => {
-		if (err) throw new Error(err);
+		if (err) console.log(err + "[at Input]")
 
 		let tokens = interpreter.lex(data);
 		console.log(tokens);
