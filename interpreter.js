@@ -53,4 +53,29 @@ interpreter["lex"] = (input) => {
 	return tokens;
 }
 
+interpreter["parse"] = (tokens) => {
+	var functions = [
+		"print"
+	];
+
+	for (let i = 0; i < tokens.length; i++) {
+		const token = tokens[i];
+		if (functions.indexOf(token) != -1) {
+			if (tokens[i + 1] == "(") {
+				switch (token) {
+					case "print":
+						console.log(tokens[i + 2]);
+						break;
+				
+					default:
+						// Get Instructions from Functions
+						break;
+				}
+			} else {
+				throw new Error(`Function with no brace [Token Index ${i}]`);
+			}
+		}
+	}
+}
+
 module.exports = interpreter;

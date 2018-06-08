@@ -9,5 +9,6 @@ if (process.argv[2] == null) {
 
 		let tokens = interpreter.lex(data);
 		console.log(tokens);
+		let out = interpreter.parse(tokens);
 	})
 }
