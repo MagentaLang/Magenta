@@ -1,5 +1,26 @@
 var interpreter = {};
 
+function valid(token) {
+	if ((token == "(" || ")") ||
+		isCommand(token) ||
+		isValue(token)) return true;
+
+	return false;
+}
+
+function isValue(token) {
+	if (token.startsWith("STR:")) return true;
+
+	return false;
+}
+
+function isCommand(token) {
+	if (token == "<NWLNE>" ||
+		token == "<EOF>") return true;
+
+	return false;
+}
+
 interpreter["lex"] = (input) => {
 	var tokens = [];
 	var token = "";
@@ -41,7 +62,7 @@ interpreter["lex"] = (input) => {
 
 			case "\"":
 				state = !state;
-				if (state == false) tokens.push(string);
+				if (state == false) tokens.push(`STR:${string}`);
 				token = "";
 				break;
 		}
@@ -83,6 +104,8 @@ interpreter["parse"] = (tokens) => {
 				error = `Function with no brace [Token Index ${i + 1}]`;
 				break;
 			}
+		} else if (valid(token)) {
+
 		} else { // Overflow if no if-elses catch the token
 			error = `Unexpected index [Token Index ${i + 1}]`;
 			break;
