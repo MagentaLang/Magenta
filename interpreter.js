@@ -14,10 +14,12 @@ interpreter["lex"] = (input) => {
 				break;
 
 			case "\n":
+				tokens.push("<NWLNE>")
 				token = "";
 				break;
 			
 			case ";":
+				tokens.push("<NWLNE>")
 				token = "";
 				break;
 
@@ -26,11 +28,19 @@ interpreter["lex"] = (input) => {
 				token = "";
 				break;
 
+			case "(":
+				tokens.push(token);
+				token = "";
+				break;
+			case ")":
+				tokens.push(token);
+				token = "";
+				break;
+
 			case "\"":
-				console.log(state)
 				state = !state;
-				console.log(state)
 				if (state == false) tokens.push(string);
+				token = "";
 				break;
 		}
 
