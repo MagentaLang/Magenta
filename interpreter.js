@@ -93,7 +93,12 @@ interpreter["parse"] = (tokens) => {
 			if (tokens[i + 1] == "(") {
 				switch (token) {
 					case "print":
-						console.log(tokens[i + 2]);
+						if (isValue(tokens[i + 2])) {
+							console.log(tokens[i + 2].substring(4, tokens[i + 2].length));
+						} else {
+							error = `Token is not a value [Token Index ${i + 1}]`;
+							break;
+						}
 						break;
 				
 					default:
