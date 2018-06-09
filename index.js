@@ -8,7 +8,6 @@ if (process.argv[2] == null) {
 		if (err) console.log(err + "[at Input]")
 
 		let tokens = interpreter.lex(data);
-		console.log(tokens);
 		let out = interpreter.parse(tokens);
 	})
 }

@@ -40,6 +40,27 @@ function getArgs(info, callback) {
 	callback(error, values);
 }
 
+function assignFunctions(tokens) {
+	var out = [];
+
+	for (let i = 0; i < tokens.length; i++) {
+		let token = tokens[i];
+		out[i] = token;
+		if (token.startsWith("VAR:")) {
+			let fun = `FUN:${token.substring(4, token.length)}`
+			if (interpreter.functions[fun] != null) {
+				out[i] = fun;
+			}
+		}
+	}
+
+	return out;
+}
+
+interpreter["functions"] = {
+	"FUN:print": { args: 1 }
+};
+
 interpreter["lex"] = (input) => {
 	var tokens = [];
 	var token = "";
@@ -59,14 +80,14 @@ interpreter["lex"] = (input) => {
 				if (state == false) {
 					token = "";
 					if (name != "") {
-						tokens.push(name);
+						tokens.push(`VAR:${name}`);
 						name = "";
 					}
 				}
 				break;
 
 			case "\n":
-				if (name != "") tokens.push(name);
+				if (name != "") tokens.push(`VAR:${name}`);
 				tokens.push("<NWLNE>")
 				token = "";
 				break;
@@ -76,18 +97,18 @@ interpreter["lex"] = (input) => {
 				break;
 			
 			case ";":
-				if (name != "") tokens.push(name);
+				if (name != "") tokens.push(`VAR:${name}`);
 				tokens.push("<NWLNE>")
 				token = "";
 				break;
 
 			case "(":
-				if (name != "") tokens.push(name);
+				if (name != "") tokens.push(`VAR:${name}`);
 				tokens.push("(");
 				token = "";
 				break;
 			case ")":
-				if (name != "") tokens.push(name);
+				if (name != "") tokens.push(`VAR:${name}`);
 				tokens.push(")");
 				token = "";
 				break;
@@ -116,19 +137,20 @@ interpreter["lex"] = (input) => {
 	return tokens;
 }
 
-interpreter["parse"] = (tokens) => {
-	var functions = {
-		"print": { args: 1 }
-	};
+interpreter["parse"] = (t) => {
+	var tokens = assignFunctions(t);
+
+	console.log(tokens);
+
 	var error = null;
 
 	for (let i = 0; i < tokens.length; i++) {
 		const token = tokens[i];
-		if (functions[token] != null) {
+		if (interpreter.functions[token] != null) {
 			if (tokens[i + 1] == "(") {
-				switch (token) {
+				switch (token.substring(4, token.length)) {
 					case "print":
-						getArgs({tokens:tokens,args:functions.print.args,i:i}, (err, args) => {
+						getArgs({tokens:tokens,args:interpreter.functions["FUN:print"].args,i:i}, (err, args) => {
 							if (err) {
 								error = err;
 							}
