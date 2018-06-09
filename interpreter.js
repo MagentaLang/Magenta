@@ -21,6 +21,23 @@ function isCommand(token) {
 	return false;
 }
 
+function getArgs(info, callback) {
+	var values = [];
+	var error = null;
+	for (let arg = 0; arg < info.args; arg++) {
+		if (isValue(info.tokens[info.i + 2 + arg])) {
+			values.push(info.tokens[info.i + 2 + arg]);
+		}
+	}
+
+	if (info.tokens[info.i + 2 + info.args] != ")") {
+		error = `Arguments Error [Token Index ${info.i}-${info.i + 2 + info.args}]`;
+	}
+
+	if (error) error = `Error: ${error} [at Parser > GetArgs()]`;
+	callback(error, values);
+}
+
 interpreter["lex"] = (input) => {
 	var tokens = [];
 	var token = "";
@@ -62,7 +79,10 @@ interpreter["lex"] = (input) => {
 
 			case "\"":
 				state = !state;
-				if (state == false) tokens.push(`STR:${string}`);
+				if (state == false) {
+					tokens.push(`STR:${string}`);
+					string = "";
+				}
 				token = "";
 				break;
 		}
@@ -82,23 +102,24 @@ interpreter["lex"] = (input) => {
 }
 
 interpreter["parse"] = (tokens) => {
-	var functions = [
-		"print"
-	];
+	var functions = {
+		"print": { args: 1 }
+	};
 	var error = null;
 
 	for (let i = 0; i < tokens.length; i++) {
 		const token = tokens[i];
-		if (functions.indexOf(token) != -1) {
+		if (functions[token] != null) {
 			if (tokens[i + 1] == "(") {
 				switch (token) {
 					case "print":
-						if (isValue(tokens[i + 2])) {
-							console.log(tokens[i + 2].substring(4, tokens[i + 2].length));
-						} else {
-							error = `Token is not a value [Token Index ${i + 1}]`;
-							break;
-						}
+						getArgs({tokens:tokens,args:functions.print.args,i:i}, (err, args) => {
+							if (err) {
+								error = console.log(err);
+							}
+
+							console.log(args[0]);
+						});
 						break;
 				
 					default:
@@ -107,17 +128,18 @@ interpreter["parse"] = (tokens) => {
 				}
 			} else {
 				error = `Function with no brace [Token Index ${i + 1}]`;
-				break;
 			}
 		} else if (valid(token)) {
 
 		} else { // Overflow if no if-elses catch the token
 			error = `Unexpected index [Token Index ${i + 1}]`;
+		}
+
+		if (error) {
+			console.log(`Error: ${error} [at Parser]`);
 			break;
 		}
 	}
-
-	if (error) console.log(`Error: ${error} [at Parser]`);
 }
 
 module.exports = interpreter;
