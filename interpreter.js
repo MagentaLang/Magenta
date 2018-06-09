@@ -27,53 +27,68 @@ function getArgs(info, callback) {
 	for (let arg = 0; arg < info.args; arg++) {
 		if (isValue(info.tokens[info.i + 2 + arg])) {
 			values.push(info.tokens[info.i + 2 + arg]);
+		} else {
+			error = `Argument not value [Token Index ${info.i + 2 + arg}]`;
 		}
 	}
 
 	if (info.tokens[info.i + 2 + info.args] != ")") {
-		error = `Arguments Error [Token Index ${info.i}-${info.i + 2 + info.args}]`;
+		error = `Arguments Error [Token Index ${info.i+1}-${info.i + 3 + info.args}]`;
 	}
 
-	if (error) error = `Error: ${error} [at Parser > GetArgs()]`;
+	if (error) error = `${error} [at GetArgs()]`;
 	callback(error, values);
 }
 
 interpreter["lex"] = (input) => {
 	var tokens = [];
 	var token = "";
-	string = "";
+
+	var string = "";
+	var name = "";
+	
 	var state = false; // false = 0, true = 1
 
 	var error = null;
 
 	for (let i = 0; i < input.length; i++) {
 		token += input[i];
-		switch (token) {
+		name = token.substring(0, token.length-1);
+		switch (token[token.length-1]) {
 			case " ":
-				if (state == false) token = "";
+				if (state == false) {
+					token = "";
+					if (name != "") {
+						tokens.push(name);
+						name = "";
+					}
+				}
 				break;
 
 			case "\n":
+				if (name != "") tokens.push(name);
 				tokens.push("<NWLNE>")
+				token = "";
+				break;
+
+			case "\r":
 				token = "";
 				break;
 			
 			case ";":
+				if (name != "") tokens.push(name);
 				tokens.push("<NWLNE>")
 				token = "";
 				break;
 
-			case "print":
-				tokens.push(token);
-				token = "";
-				break;
-
 			case "(":
-				tokens.push(token);
+				if (name != "") tokens.push(name);
+				tokens.push("(");
 				token = "";
 				break;
 			case ")":
-				tokens.push(token);
+				if (name != "") tokens.push(name);
+				tokens.push(")");
 				token = "";
 				break;
 
@@ -115,7 +130,7 @@ interpreter["parse"] = (tokens) => {
 					case "print":
 						getArgs({tokens:tokens,args:functions.print.args,i:i}, (err, args) => {
 							if (err) {
-								error = console.log(err);
+								error = err;
 							}
 
 							console.log(args[0]);
