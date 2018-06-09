@@ -9,7 +9,12 @@ function valid(token) {
 }
 
 function isValue(token) {
-	if (token.startsWith("STR:")) return true;
+	if (token.startsWith("STR:") ||
+		token.startsWith("INT:") ||
+		token.startsWith("VAR:") ||
+		token.startsWith("NIL:") ||
+		token.startsWith("FUN:") ||
+		token.startsWith("ERR:")) return true;
 
 	return false;
 }
@@ -38,6 +43,28 @@ function getArgs(info, callback) {
 
 	if (error) error = `${error} [at GetArgs()]`;
 	callback(error, values);
+}
+
+function getValue(value) {
+	let out = "";
+
+	let error = null;
+
+	if (isValue(value)) {
+		let type = value.substring(0, 3);
+		out = value.substring(4, value.length);
+
+		if (type == "INT") out = parseFloat(out);
+		if (type == "NIL") out = null;
+	} else {
+		error = `Not a value`
+	}
+
+	if (error) {
+		error = `ERR:${error} [at GetValue()]`;
+		return error;
+	}
+	return out;
 }
 
 function assignFunctions(tokens) {
@@ -155,7 +182,8 @@ interpreter["parse"] = (t) => {
 								error = err;
 							}
 
-							console.log(args[0]);
+							if (getValue(args[0]).startsWith("ERR:")) error = getValue(getValue(args[0]));
+							console.log(getValue(args[0]));
 						});
 						break;
 				
